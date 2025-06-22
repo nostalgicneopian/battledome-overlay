@@ -129,7 +129,6 @@ document.querySelectorAll("#start, #fight").forEach(element => {
                     renderedRound = gameState.round;
                 }
                 initializeBattleLog();
-                console.log("Game State Initialized:", gameState);
             })
         }
         else if (element.id === "fight") {
@@ -138,7 +137,6 @@ document.querySelectorAll("#start, #fight").forEach(element => {
                 renderedRound = gameState.round - 1;
                 renderBattleLog();
                 GM_setValue("gameState", JSON.stringify(gameState));
-                console.log("Game State Updated:", gameState);
             })
         }
         
@@ -150,20 +148,12 @@ function initializeRoundButtons() {
         if (gameState.round > 0 && renderedRound > 0) {
             renderedRound -= 1;
             renderBattleLog();
-            console.log("Rendered Round:", renderedRound);
-            console.log("Game State Round:", gameState.round);
-            console.log("Logs Length:", gameState.logs.length);
-            console.log("Log Content:", gameState.logs[renderedRound]);
         }
     });
 
     document.querySelector("#afterLogButton").addEventListener("click", function() {
         if (gameState.round > 0 && renderedRound < gameState.round - 1) {
             renderedRound += 1;
-            console.log("Rendered Round:", renderedRound);
-            console.log("Game State Round:", gameState.round);
-            console.log("Logs Length:", gameState.logs.length);
-            console.log("Log Content:", gameState.logs[renderedRound]);
             renderBattleLog();
         }
     });
