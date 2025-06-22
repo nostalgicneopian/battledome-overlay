@@ -9,7 +9,6 @@ class Player {
     }
 }
 
-
 class GameState {
     constructor() {
         this.battleId = null;
