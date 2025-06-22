@@ -8,7 +8,14 @@ class Player {
         this.damage = [];
     }
 
-    updateItemsaAndAbilities(nodes) {
+    getItems(round) {
+        return this.items[round] || [];
+    }
+    getAbility(round) {
+        return this.abilities[round] || null;
+    }
+
+    updateItemsaAndAbility(nodes) {
         let items = [];
         let ability = null;
 
@@ -23,9 +30,8 @@ class Player {
 
         this.items.push(items);
         this.abilities.push(ability);
-
-        console.log(this.items, this.abilities);
     }
+
 }
 
 class GameState {
@@ -127,6 +133,28 @@ function renderBattleLog() {
 
 }
 
+function renderItemsAndAbility(nodes, player) {
+    items = player.items[renderedRound] || [];
+    ability = player.abilities[renderedRound] || null;
+
+    Array.from(nodes).forEach(node => {
+        if (node.id.includes("e1")) {
+            node.querySelector("div").style.backgroundImage = items[0];
+        }
+        else if (node.id.includes("e2")) {
+            node.querySelector("div").style.backgroundImage = items[1];
+        }
+        else if (node.id.includes("a")) {
+            node.querySelector("div").style.backgroundImage = ability; 
+        }
+
+        if (renderedRound !== gameState.round - 1) 
+            node.querySelector("div").style.opacity = "0.5";
+        else
+            node.querySelector("div").style.opacity = "1";
+    });
+}
+
 /* === EVENT HANDLING === */
 
 (function() {
@@ -160,18 +188,20 @@ document.querySelectorAll("#start, #fight").forEach(element => {
                     renderedRound = gameState.round - 1;
                 }
                 initializeBattleLog();
+                renderItemsAndAbility(document.getElementsByClassName("menu p1"), gameState.player1);
+                renderItemsAndAbility(document.getElementsByClassName("menu p2"), gameState.player2);
             })
         }
         else if (element.id === "fight") {
             await waitForServerResponse().then(response => {
                 if (response.p1.fight_step === response.p2.fight_step && response.p1.fight_step > gameState.round) {
                     gameState.updateRound(response);
+                    gameState.player1.updateItemsaAndAbility(document.getElementsByClassName("menu p1"));
+                    gameState.player2.updateItemsaAndAbility(document.getElementsByClassName("menu p2"));
 
-                    gameState.player1.updateItemsaAndAbilities(document.getElementsByClassName("menu p1"));
-                    gameState.player2.updateItemsaAndAbilities(document.getElementsByClassName("menu p2"));
-                    
                     renderedRound = gameState.round - 1;
                     renderBattleLog();
+                    
                     GM_setValue("gameState", JSON.stringify(gameState));
                 }
             })
@@ -185,6 +215,8 @@ function initializeRoundButtons() {
         if (gameState.round > 0 && renderedRound > 0) {
             renderedRound -= 1;
             renderBattleLog();
+            renderItemsAndAbility(document.getElementsByClassName("menu p1"), gameState.player1);
+            renderItemsAndAbility(document.getElementsByClassName("menu p2"), gameState.player2);
         }
     });
 
@@ -192,6 +224,8 @@ function initializeRoundButtons() {
         if (gameState.round > 0 && renderedRound < gameState.round - 1) {
             renderedRound += 1;
             renderBattleLog();
+            renderItemsAndAbility(document.getElementsByClassName("menu p1"), gameState.player1);
+            renderItemsAndAbility(document.getElementsByClassName("menu p2"), gameState.player2);
         }
     });
 }
