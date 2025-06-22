@@ -126,7 +126,7 @@ document.querySelectorAll("#start, #fight").forEach(element => {
                 }
                 else {
                     gameState.loadFromJSON(cachedGameState);
-                    renderedRound = gameState.round;
+                    renderedRound = gameState.round - 1;
                 }
                 initializeBattleLog();
             })
