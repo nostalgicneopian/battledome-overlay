@@ -7,6 +7,25 @@ class Player {
         this.abilities = [];
         this.damage = [];
     }
+
+    updateItemsaAndAbilities(nodes) {
+        let items = [];
+        let ability = null;
+
+        Array.from(nodes).forEach(node => {
+            const backgroundImage = node.querySelector("div").style.backgroundImage;
+            if (node.id.includes("e")) {
+                items.push(backgroundImage);
+            } else if (node.id.includes("a")) {
+                ability = backgroundImage;
+            }
+        });
+
+        this.items.push(items);
+        this.abilities.push(ability);
+
+        console.log(this.items, this.abilities);
+    }
 }
 
 class GameState {
@@ -147,6 +166,10 @@ document.querySelectorAll("#start, #fight").forEach(element => {
             await waitForServerResponse().then(response => {
                 if (response.p1.fight_step === response.p2.fight_step && response.p1.fight_step > gameState.round) {
                     gameState.updateRound(response);
+
+                    gameState.player1.updateItemsaAndAbilities(document.getElementsByClassName("menu p1"));
+                    gameState.player2.updateItemsaAndAbilities(document.getElementsByClassName("menu p2"));
+                    
                     renderedRound = gameState.round - 1;
                     renderBattleLog();
                     GM_setValue("gameState", JSON.stringify(gameState));
