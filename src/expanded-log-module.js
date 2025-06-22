@@ -2,48 +2,54 @@
 
 class Player {
     constructor() {
-      this.hp = null;
-      this.items = [];
-      this.abilities = [];
+        this.hp = null;
+        this.items = [];
+        this.abilities = [];
+        this.damage = [];
     }
-  }
-  
-  class GameState {
-      constructor() {
-          this.battleId = null;
-          this.player1 = new Player();
-          this.player2 = new Player();
-          this.round = 0;
-          this.logs = [];
-      }
-  
-      loadFromJSON(json) {
-          this.battleId = json.battleId;
-          this.player1.hp = json.player1.hp;
-          this.player1.items = json.player1.items || [];
-          this.player1.abilities = json.player1.abilities || [];
-          this.player2.hp = json.player2.hp;
-          this.player2.items = json.player2.items || [];
-          this.player2.abilities = json.player2.abilities || [];
-          this.round = json.round || 0;
-          this.logs = json.logs || [];
-      }
-  
-      loadFromResponse(response) {
-          this.battleId = response.battle.battleid;
-          this.player1.hp = response.p1.hp;
-          this.player2.hp = response.p2.hp;
-          this.round = 0;
-          this.logs = [];
-      }
-  
-      updateRound(response) {
-          this.logs.push(response.log);
-          this.player1.hp = response.p1.hp;
-          this.player2.hp = response.p2.hp;
-          this.round += 1;
-      }
-  }
+}
+
+
+class GameState {
+    constructor() {
+        this.battleId = null;
+        this.player1 = new Player();
+        this.player2 = new Player();
+        this.round = 0;
+        this.logs = [];
+    }
+
+    loadFromJSON(json) {
+        this.battleId = json.battleId;
+        this.player1.hp = json.player1.hp;
+        this.player1.items = json.player1.items || [];
+        this.player1.abilities = json.player1.abilities || [];
+        this.player1.damage = json.player1.damage || [];
+        this.player2.hp = json.player2.hp;
+        this.player2.items = json.player2.items || [];
+        this.player2.damage = json.player2.damage || [];
+        this.player2.abilities = json.player2.abilities || [];
+        this.round = json.round || 0;
+        this.logs = json.logs || [];
+    }
+
+    loadFromResponse(response) {
+        this.battleId = response.battle.battleid;
+        this.player1.hp = response.p1.hp;
+        this.player2.hp = response.p2.hp;
+        this.round = 0;
+        this.logs = [];
+    }
+
+    updateRound(response) {
+        this.logs.push(response.log);
+        this.player1.hp = response.p1.hp;
+        this.player2.hp = response.p2.hp;
+        this.player1.damage.push(response.p1.last_damage);
+        this.player2.damage.push(response.p2.last_damage);
+        this.round += 1;
+    }
+}
 
 /* === GLOBALS === */
 
@@ -51,21 +57,24 @@ const responses = [];
 const gameState = new GameState();
 var renderedRound = gameState.round;
 
-
-/*=== RENDERING === */
+/* === RENDERING === */
 
 function initializeBattleLog() {
     const roundCont = document.querySelector("#flround");
     const logCont = document.querySelector("#log");
+    const logTotalsCont = document.querySelector("#log_totals");
 
     const roundClone = roundCont.cloneNode(true);
     const logClone = logCont.cloneNode(true);
+    const logTotalsClone = logTotalsCont.cloneNode(true);
 
     roundCont.id = "hide";
     logCont.id = "hide";
+    logTotalsCont.id = "hide";
 
     roundCont.parentNode.insertBefore(roundClone, roundCont.nextSibling);
     logCont.parentNode.insertBefore(logClone, logCont.nextSibling);
+    logTotalsCont.parentNode.insertBefore(logTotalsClone, logTotalsCont.nextSibling);
 
     document.querySelectorAll("#hide").forEach(element => {
         element.style.display = "none";
@@ -89,10 +98,15 @@ function initializeBattleLog() {
 function renderBattleLog() {
     const roundCont = document.querySelector("#flround");
     const logCont = document.querySelector("#log");
+    const logTotalsCont = document.querySelector("#log_totals");
 
     roundCont.textContent = renderedRound + 1;
-    if (gameState.round > 0) 
+    if (gameState.round > 0) {
         logCont.innerHTML = gameState.logs[renderedRound];
+        logTotalsCont.querySelector("#fltp1").textContent = gameState.player1.damage[renderedRound];
+        logTotalsCont.querySelector("#fltp2").textContent = gameState.player2.damage[renderedRound];
+    }
+
 }
 
 /* === EVENT HANDLING === */
@@ -119,7 +133,6 @@ document.querySelectorAll("#start, #fight").forEach(element => {
             await waitForServerResponse().then(response => {
                 const cachedGameState = JSON.parse(GM_getValue("gameState", null));
                 const battleId = response.battle.battleid;
-                
                 if (battleId !== cachedGameState?.battleId) {
                     gameState.loadFromResponse(response);
                     GM_setValue("gameState", JSON.stringify(gameState));
