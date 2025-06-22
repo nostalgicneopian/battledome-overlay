@@ -145,10 +145,12 @@ document.querySelectorAll("#start, #fight").forEach(element => {
         }
         else if (element.id === "fight") {
             await waitForServerResponse().then(response => {
-                gameState.updateRound(response);
-                renderedRound = gameState.round - 1;
-                renderBattleLog();
-                GM_setValue("gameState", JSON.stringify(gameState));
+                if (response.p1.fight_step === response.p2.fight_step && response.p1.fight_step > gameState.round) {
+                    gameState.updateRound(response);
+                    renderedRound = gameState.round - 1;
+                    renderBattleLog();
+                    GM_setValue("gameState", JSON.stringify(gameState));
+                }
             })
         }
         

@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        Neopets Battledome Overlay
 // @namespace   neopets
-// @version     0.0.2
+// @version     0.0.3
 // @description Quality of Life improvements to the Battledome
 // @author      nostalgicneopian
 // @match       *://*.neopets.com/dome/*
