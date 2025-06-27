@@ -80,3 +80,5 @@ class GameState {
 const responses = [];
 const gameState = new GameState();
 var renderedRound = gameState.round;
+
+loadExpandedLogModule();

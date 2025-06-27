@@ -54,21 +54,25 @@ function renderItemsAndAbility(nodes, player) {
     items = player.items[renderedRound] || [];
     ability = player.abilities[renderedRound] || null;
 
+    const updateNode = (node, itemOrAbility) => {
+        const div = node.querySelector("div");
+        div.style.backgroundImage = itemOrAbility || "";
+        if (itemOrAbility && renderedRound !== gameState.round - 1)
+            div.id = "past-icon";
+        else if (itemOrAbility && renderedRound === gameState.round - 1)
+            div.id = "most-recent-icon";
+        else
+            div.id = "";
+    };
+
     Array.from(nodes).forEach(node => {
         if (node.id.includes("e1")) {
-            node.querySelector("div").style.backgroundImage = items[0];
+            updateNode(node, items[0]);
+        } else if (node.id.includes("e2")) {
+            updateNode(node, items[1]);
+        } else if (node.id.includes("a")) {
+            updateNode(node, ability);
         }
-        else if (node.id.includes("e2")) {
-            node.querySelector("div").style.backgroundImage = items[1];
-        }
-        else if (node.id.includes("a")) {
-            node.querySelector("div").style.backgroundImage = ability; 
-        }
-
-        if (renderedRound !== gameState.round - 1) 
-            node.querySelector("div").style.opacity = "0.5";
-        else
-            node.querySelector("div").style.opacity = "1";
     });
 }
 
@@ -103,10 +107,10 @@ document.querySelectorAll("#start, #fight").forEach(element => {
                 else {
                     gameState.loadFromJSON(cachedGameState);
                     renderedRound = gameState.round - 1;
+                    renderItemsAndAbility(document.getElementsByClassName("menu p1"), gameState.player1);
+                    renderItemsAndAbility(document.getElementsByClassName("menu p2"), gameState.player2);
                 }
                 initializeBattleLog();
-                renderItemsAndAbility(document.getElementsByClassName("menu p1"), gameState.player1);
-                renderItemsAndAbility(document.getElementsByClassName("menu p2"), gameState.player2);
             })
         }
         else if (element.id === "fight") {
@@ -138,7 +142,7 @@ function initializeRoundButtons() {
     });
 
     document.querySelector("#afterLogButton").addEventListener("click", function() {
-        if (gameState.round > 0 && renderedRound < gameState.round - 1) {
+        if (gameState.round > 0 && renderedRound < Math.abs(gameState.round - 1)) {
             renderedRound += 1;
             renderBattleLog();
             renderItemsAndAbility(document.getElementsByClassName("menu p1"), gameState.player1);
@@ -161,4 +165,41 @@ function waitForServerResponse() {
             reject(new Error("Timeout waiting for server response"));
         }, 10000); // might need to add more time if neo is lagging
     });
+}
+
+document.querySelectorAll("#p1e1m, #p1e2m, #p1am").forEach(element => {
+    element.addEventListener("click", function() {
+        if (gameState.round > 0 && renderedRound !== gameState.round - 1) {
+            renderedRound = gameState.round - 1;
+            renderBattleLog();
+            renderItemsAndAbility(document.getElementsByClassName("menu p1"), gameState.player1);
+            renderItemsAndAbility(document.getElementsByClassName("menu p2"), gameState.player2);
+        }
+        else {
+            Array.from(document.getElementsByClassName("menu p1")).forEach(node => {
+                node.querySelector("div").id = "";
+
+                if (!node.classList.contains("selected")) {
+                    node.querySelector("div").style.backgroundImage = "";
+                }
+                if (element.id === "p1am" && element.classList.contains("selected")) {
+                    document.querySelector("p1am").classList.remove("selected");
+                }
+            });
+        }
+    });
+});
+
+// Somehow, abilities don't have the "selected" class. This mimics that behavior.
+Array.from(document.getElementsByClassName("ability")).forEach(element => {
+    element.addEventListener("click", function() {
+        document.querySelector("#p1am").classList.add("selected");
+    });
+});
+
+function loadExpandedLogModule() {
+    const style = GM_getResourceText('log-css');
+    const styleElement = document.createElement('style');
+    styleElement.textContent = style;
+    document.head.appendChild(styleElement);
 }
