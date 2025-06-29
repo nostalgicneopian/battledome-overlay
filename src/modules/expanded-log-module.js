@@ -1,4 +1,4 @@
-/* === RENDERING === */
+/* === SETUP === */
 
 function initializeBattleLog() {
     const roundCont = document.querySelector("#flround");
@@ -9,17 +9,14 @@ function initializeBattleLog() {
     const logClone = logCont.cloneNode(true);
     const logTotalsClone = logTotalsCont.cloneNode(true);
 
-    roundCont.id = "hide";
-    logCont.id = "hide";
-    logTotalsCont.id = "hide";
+    Array.from([roundCont, logCont, logTotalsCont]).forEach(node => {
+        node.id = "";
+        node.classList.add("hidden");
+    });
 
     roundCont.parentNode.insertBefore(roundClone, roundCont.nextSibling);
     logCont.parentNode.insertBefore(logClone, logCont.nextSibling);
     logTotalsCont.parentNode.insertBefore(logTotalsClone, logTotalsCont.nextSibling);
-
-    document.querySelectorAll("#hide").forEach(element => {
-        element.style.display = "none";
-    });
 
     const beforeLogButton = document.createElement("button");
     beforeLogButton.textContent = "Previous Round";
@@ -36,6 +33,48 @@ function initializeBattleLog() {
     renderBattleLog();
 }
 
+function initializeRoundButtons() {
+    document.querySelector("#beforeLogButton").addEventListener("click", function() {
+        if (gameState.round > 0 && renderedRound > 0) {
+            renderedRound -= 1;
+            renderBattleLog();
+            renderRound(gameState.player1);
+            renderRound(gameState.player2);
+
+            document.querySelectorAll('#menu-icon').forEach(node => { node.classList.add('hidden'); });
+            document.querySelectorAll('#custom-icon').forEach(node => { node.classList.remove('hidden'); });
+        }
+    });
+
+    document.querySelector("#afterLogButton").addEventListener("click", function() {
+        if (gameState.round > 0 && renderedRound < (gameState.logs.length - 1)) {
+            renderedRound += 1;
+            renderBattleLog();
+            renderRound(gameState.player1);
+            renderRound(gameState.player2);
+
+            if (renderedRound === (gameState.round - 1)) {
+            document.querySelectorAll('#custom-icon').forEach(node => { node.classList.add('hidden'); });
+            document.querySelectorAll('#menu-icon').forEach(node => { node.classList.remove('hidden'); });
+            }
+        }
+    });
+}
+
+function initializePastItemsView() {
+    const itemDivs = document.getElementsByClassName("menu");
+
+    Array.from(itemDivs).forEach(node => {
+        node.querySelector('div').id = "menu-icon";
+        const div = document.createElement("div");
+        div.id = "custom-icon";
+        div.classList.add("hidden");
+        node.appendChild(div);
+    });
+}
+
+/* === RENDERING === */
+
 function renderBattleLog() {
     const roundCont = document.querySelector("#flround");
     const logCont = document.querySelector("#log");
@@ -50,28 +89,18 @@ function renderBattleLog() {
 
 }
 
-function renderItemsAndAbility(nodes, player) {
-    items = player.items[renderedRound] || [];
-    ability = player.abilities[renderedRound] || null;
+function renderRound(player) {
+    const roundInfo = player.getRound(renderedRound);
+    const nodeIds = Object.keys(roundInfo);
+    const nodes = document.querySelectorAll(`#${nodeIds.join(", #")}`);
 
-    const updateNode = (node, itemOrAbility) => {
-        const div = node.querySelector("div");
-        div.style.backgroundImage = itemOrAbility || "";
-        if (itemOrAbility && renderedRound !== gameState.round - 1)
-            div.id = "past-icon";
-        else if (itemOrAbility && renderedRound === gameState.round - 1)
-            div.id = "most-recent-icon";
-        else
-            div.id = "";
-    };
-
-    Array.from(nodes).forEach(node => {
-        if (node.id.includes("e1")) {
-            updateNode(node, items[0]);
-        } else if (node.id.includes("e2")) {
-            updateNode(node, items[1]);
-        } else if (node.id.includes("a")) {
-            updateNode(node, ability);
+    nodes.forEach(node => {
+        node.querySelector("#custom-icon").style.backgroundImage = roundInfo[node.id].backgroundImage || "";
+        if (roundInfo[node.id].backgroundImage) 
+            node.querySelector("#custom-icon").classList.add("has-icon");
+        else {
+            node.querySelector("#custom-icon").classList.remove("has-icon");
+            node.querySelector("#custom-icon").style.backgroundSize = "";
         }
     });
 }
@@ -107,9 +136,7 @@ document.querySelectorAll("#start, #fight").forEach(element => {
                 else {
                     gameState.loadFromJSON(cachedGameState);
                     renderedRound = gameState.round - 1;
-                    renderItemsAndAbility(document.getElementsByClassName("menu p1"), gameState.player1);
-                    renderItemsAndAbility(document.getElementsByClassName("menu p2"), gameState.player2);
-                }
+                }         
                 initializeBattleLog();
             })
         }
@@ -117,39 +144,18 @@ document.querySelectorAll("#start, #fight").forEach(element => {
             await waitForServerResponse().then(response => {
                 if (response.p1.fight_step === response.p2.fight_step && response.p1.fight_step > gameState.round) {
                     gameState.updateRound(response);
-                    gameState.player1.updateItemsaAndAbility(document.getElementsByClassName("menu p1"));
-                    gameState.player2.updateItemsaAndAbility(document.getElementsByClassName("menu p2"));
+                    gameState.player1.addRound(document.getElementsByClassName("menu p1"));
+                    gameState.player2.addRound(document.getElementsByClassName("menu p2"));
+                    GM_setValue("gameState", JSON.stringify(gameState));
 
                     renderedRound = gameState.round - 1;
-                    renderBattleLog();
-                    
-                    GM_setValue("gameState", JSON.stringify(gameState));
+                    renderBattleLog();   
                 }
             })
         }
         
     });
 });
-
-function initializeRoundButtons() {
-    document.querySelector("#beforeLogButton").addEventListener("click", function() {
-        if (gameState.round > 0 && renderedRound > 0) {
-            renderedRound -= 1;
-            renderBattleLog();
-            renderItemsAndAbility(document.getElementsByClassName("menu p1"), gameState.player1);
-            renderItemsAndAbility(document.getElementsByClassName("menu p2"), gameState.player2);
-        }
-    });
-
-    document.querySelector("#afterLogButton").addEventListener("click", function() {
-        if (gameState.round > 0 && renderedRound < Math.abs(gameState.round - 1)) {
-            renderedRound += 1;
-            renderBattleLog();
-            renderItemsAndAbility(document.getElementsByClassName("menu p1"), gameState.player1);
-            renderItemsAndAbility(document.getElementsByClassName("menu p2"), gameState.player2);
-        }
-    });
-}
 
 function waitForServerResponse() {
     return new Promise((resolve, reject) => {
@@ -167,39 +173,10 @@ function waitForServerResponse() {
     });
 }
 
-document.querySelectorAll("#p1e1m, #p1e2m, #p1am").forEach(element => {
-    element.addEventListener("click", function() {
-        if (gameState.round > 0 && renderedRound !== gameState.round - 1) {
-            renderedRound = gameState.round - 1;
-            renderBattleLog();
-            renderItemsAndAbility(document.getElementsByClassName("menu p1"), gameState.player1);
-            renderItemsAndAbility(document.getElementsByClassName("menu p2"), gameState.player2);
-        }
-        else {
-            Array.from(document.getElementsByClassName("menu p1")).forEach(node => {
-                node.querySelector("div").id = "";
-
-                if (!node.classList.contains("selected")) {
-                    node.querySelector("div").style.backgroundImage = "";
-                }
-                if (element.id === "p1am" && element.classList.contains("selected")) {
-                    document.querySelector("p1am").classList.remove("selected");
-                }
-            });
-        }
-    });
-});
-
-// Somehow, abilities don't have the "selected" class. This mimics that behavior.
-Array.from(document.getElementsByClassName("ability")).forEach(element => {
-    element.addEventListener("click", function() {
-        document.querySelector("#p1am").classList.add("selected");
-    });
-});
-
 function loadExpandedLogModule() {
     const style = GM_getResourceText('log-css');
     const styleElement = document.createElement('style');
     styleElement.textContent = style;
     document.head.appendChild(styleElement);
+    initializePastItemsView();
 }

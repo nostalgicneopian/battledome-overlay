@@ -3,33 +3,23 @@
 class Player {
     constructor() {
         this.hp = null;
-        this.items = [];
-        this.abilities = [];
+        this.rounds = [];
         this.damage = [];
     }
 
-    getItems(round) {
-        return this.items[round] || [];
-    }
-    getAbility(round) {
-        return this.abilities[round] || null;
+    getRound(round) {
+        return this.rounds[round] || null;
     }
 
-    updateItemsaAndAbility(nodes) {
-        let items = [];
-        let ability = null;
+    addRound(nodes) {
+        let round = {};
 
         Array.from(nodes).forEach(node => {
-            const backgroundImage = node.querySelector("div").style.backgroundImage;
-            if (node.id.includes("e")) {
-                items.push(backgroundImage);
-            } else if (node.id.includes("a")) {
-                ability = backgroundImage;
-            }
+            round[node.id] = {
+                backgroundImage: node.querySelector('div').style.backgroundImage
+            };
         });
-
-        this.items.push(items);
-        this.abilities.push(ability);
+        this.rounds.push(round);
     }
 
 }
@@ -46,13 +36,11 @@ class GameState {
     loadFromJSON(json) {
         this.battleId = json.battleId;
         this.player1.hp = json.player1.hp;
-        this.player1.items = json.player1.items || [];
-        this.player1.abilities = json.player1.abilities || [];
+        this.player1.rounds = json.player1.rounds || [];
         this.player1.damage = json.player1.damage || [];
         this.player2.hp = json.player2.hp;
-        this.player2.items = json.player2.items || [];
+        this.player2.rounds = json.player2.rounds || [];
         this.player2.damage = json.player2.damage || [];
-        this.player2.abilities = json.player2.abilities || [];
         this.round = json.round || 0;
         this.logs = json.logs || [];
     }
