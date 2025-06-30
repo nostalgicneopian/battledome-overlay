@@ -1,3 +1,44 @@
+#log-buttons {
+    display: flex;
+    align-items: center;
+    width: 1016px;
+    justify-content: center;
+    margin-bottom: 10px;
+}
+
+#log-buttons a {
+    color: black;
+}
+
+#previous-round-button div {
+    background-image: url("https://images.neopets.com/dome/pages/buttons/arrow.png");
+    height: 22px;
+    width: 22px;
+    background-position: -2px -2px;
+}
+
+#next-round-button div {
+    background-image: url("https://images.neopets.com/dome/pages/buttons/arrow.png");
+    height: 22px;
+    width: 22px;
+    background-position: -28px -2px;
+}
+
+#current-round-button div {
+    background-image: url("https://images.neopets.com/games/gmc/2013/buttons/nav_bg.png");
+    height: 30px;
+    width: 162px;
+    text-align: center;
+    visibility: visible;
+    font-family: "MuseoSansRounded500", "Arial", sans-serif;
+    font-size: 15px;
+    line-height: 28px;
+    font-weight: bold;
+    display: block;
+    overflow: hidden;
+    background-position: -111px 0px;
+}
+
 #custom-icon {
     cursor: not-allowed;
     opacity: 0.5 !important;

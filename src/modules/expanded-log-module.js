@@ -18,23 +18,35 @@ function initializeBattleLog() {
     logCont.parentNode.insertBefore(logClone, logCont.nextSibling);
     logTotalsCont.parentNode.insertBefore(logTotalsClone, logTotalsCont.nextSibling);
 
-    const beforeLogButton = document.createElement("button");
-    beforeLogButton.textContent = "Previous Round";
-    beforeLogButton.id = "beforeLogButton";
+    const wrapper = document.createElement("div");
+    wrapper.id = "log-buttons"
+    const previousRoundButton = document.createElement("a");
+    previousRoundButton.id = "previous-round-button";
+    const prevDiv = document.createElement("div");
+    previousRoundButton.appendChild(prevDiv);
 
-    const afterLogButton = document.createElement("button");
-    afterLogButton.textContent = "Next Round";
-    afterLogButton.id = "afterLogButton";
+    const nextRoundButton = document.createElement("a");
+    nextRoundButton.id = "next-round-button";
+    const nextDiv = document.createElement("div");
+    nextRoundButton.appendChild(nextDiv);
 
-    logCont.parentNode.insertBefore(beforeLogButton, logCont);
-    logCont.parentNode.insertBefore(afterLogButton, logCont.nextSibling);
+    const currentRoundButton = document.createElement("a");
+    currentRoundButton.id = "current-round-button";
+    const currDiv = document.createElement("div");
+    currDiv.textContent = "Go to current round";
+    currentRoundButton.appendChild(currDiv);
+
+    wrapper.appendChild(previousRoundButton);
+    wrapper.appendChild(currentRoundButton);
+    wrapper.appendChild(nextRoundButton);
+    document.querySelector("#statusmsg").after(wrapper);
 
     initializeRoundButtons();
     renderBattleLog();
 }
 
 function initializeRoundButtons() {
-    document.querySelector("#beforeLogButton").addEventListener("click", function() {
+    document.querySelector("#previous-round-button").addEventListener("click", function() {
         if (gameState.round > 0 && renderedRound > 0) {
             renderedRound -= 1;
             renderBattleLog();
@@ -46,7 +58,7 @@ function initializeRoundButtons() {
         }
     });
 
-    document.querySelector("#afterLogButton").addEventListener("click", function() {
+    document.querySelector("#next-round-button").addEventListener("click", function() {
         if (gameState.round > 0 && renderedRound < (gameState.logs.length - 1)) {
             renderedRound += 1;
             renderBattleLog();
@@ -57,6 +69,17 @@ function initializeRoundButtons() {
             document.querySelectorAll('#custom-icon').forEach(node => { node.classList.add('hidden'); });
             document.querySelectorAll('#menu-icon').forEach(node => { node.classList.remove('hidden'); });
             }
+        }
+    });
+
+    document.querySelector("#current-round-button").addEventListener("click", function() {
+        if (gameState.round > 0 && renderedRound !== gameState.round - 1) {
+            renderedRound = gameState.round - 1;
+            renderBattleLog();
+            renderRound(gameState.player1);
+            renderRound(gameState.player2);
+            document.querySelectorAll('#menu-icon').forEach(node => { node.classList.add('hidden'); });
+            document.querySelectorAll('#custom-icon').forEach(node => { node.classList.remove('hidden'); });
         }
     });
 }
