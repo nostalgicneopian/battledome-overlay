@@ -65,39 +65,41 @@ class GameState {
 
 /* === GLOBALS === */
 
+const settings = GM_getValue('settings', null) ? JSON.parse(GM_getValue('settings', null)) : JSON.parse({showExpandedLog: false})
+console.log(settings.showExpandedLog);
 const responses = [];
 const gameState = new GameState();
 var renderedRound = gameState.round;
 
 function initializeSettings() {
     const settingsButton = document.createElement('div');
-    settingsButton.id = "settings-button";
+    settingsButton.id = 'settings-button';
 
     const menuWrapper = document.createElement('div');
-    menuWrapper.id = "settings-menu";
-
+    menuWrapper.id = 'settings-menu';
+    menuWrapper.style.display = 'none';
     settingsButton.appendChild(menuWrapper);
     settingsButton.addEventListener('click', () => {
-        menuWrapper.style.display = menuWrapper.style.display === "none" ? "inline-block" : "none";
+        menuWrapper.style.display = menuWrapper.style.display === 'none' ? 'inline-block' : 'none';
     });
 
     const expandedLogCheck = document.createElement('input');
-    expandedLogCheck.type = "checkbox";
-    expandedLogCheck.checked = true;
+    expandedLogCheck.type = 'checkbox';
+    expandedLogCheck.checked = settings.showExpandedLog;
 
     expandedLogCheck.addEventListener('change', () => {
-        const battleLog = document.querySelector('#battle-log');
-        if (battleLog) {
-            battleLog.style.display = expandedLogCheck.checked ? 'block' : 'none';
-        }
+        settings.showExpandedLog = !settings.showExpandedLog;
+        expandedLogCheck.checked = settings.showExpandedLog;
+        console.log(settings);
+        GM_setValue('settings', JSON.stringify(settings));
     });
 
     const expandedLogLabel = document.createElement('label');
-    expandedLogLabel.textContent = " Load expanded battle log";
+    expandedLogLabel.textContent = ' Load expanded battle log';
     expandedLogLabel.prepend(expandedLogCheck);
 
     menuWrapper.appendChild(expandedLogLabel);
-    document.querySelector("#bdNav").insertBefore(settingsButton, document.querySelector("#bdNav").firstElementChild);
+    document.querySelector('#bdNav').insertBefore(settingsButton, document.querySelector('#bdNav').firstElementChild);
 }
 
 (function() {
