@@ -4,6 +4,7 @@
     width: 1016px;
     justify-content: center;
     margin-bottom: 10px;
+    cursor: pointer;
 }
 
 #log-buttons a {

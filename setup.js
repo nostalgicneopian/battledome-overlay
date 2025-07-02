@@ -11,5 +11,6 @@
 // @grant       GM_getValue
 // @grant       GM_setValue
 // @grant       GM_getResourceText
+// @resource    common    https://raw.githubusercontent.com/nostalgicneopian/battledome-overlay/refs/heads/feature/expanded-battle-log/src/styles/common.css
 // @resource    log-css    https://raw.githubusercontent.com/nostalgicneopian/battledome-overlay/refs/heads/feature/expanded-battle-log/src/styles/expanded-log-module.css
 // ==/UserScript==

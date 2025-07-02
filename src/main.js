@@ -69,4 +69,44 @@ const responses = [];
 const gameState = new GameState();
 var renderedRound = gameState.round;
 
-loadExpandedLogModule();
+function initializeSettings() {
+    const settingsButton = document.createElement('div');
+    settingsButton.id = "settings-button";
+
+    const menuWrapper = document.createElement('div');
+    menuWrapper.id = "settings-menu";
+
+    settingsButton.appendChild(menuWrapper);
+    settingsButton.addEventListener('click', () => {
+        menuWrapper.style.display = menuWrapper.style.display === "none" ? "inline-block" : "none";
+    });
+
+    const expandedLogCheck = document.createElement('input');
+    expandedLogCheck.type = "checkbox";
+    expandedLogCheck.checked = true;
+
+    expandedLogCheck.addEventListener('change', () => {
+        const battleLog = document.querySelector('#battle-log');
+        if (battleLog) {
+            battleLog.style.display = expandedLogCheck.checked ? 'block' : 'none';
+        }
+    });
+
+    const expandedLogLabel = document.createElement('label');
+    expandedLogLabel.textContent = " Load expanded battle log";
+    expandedLogLabel.prepend(expandedLogCheck);
+
+    menuWrapper.appendChild(expandedLogLabel);
+    document.querySelector("#bdNav").insertBefore(settingsButton, document.querySelector("#bdNav").firstElementChild);
+}
+
+(function() {
+    'use strict';
+    const style = GM_getResourceText('common');
+    const styleElement = document.createElement('style');
+    styleElement.textContent = style;
+    document.head.appendChild(styleElement);
+    
+    initializeSettings();
+    loadExpandedLogModule();
+})();
