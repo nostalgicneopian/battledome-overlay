@@ -66,7 +66,6 @@ class GameState {
 /* === GLOBALS === */
 
 const settings = GM_getValue('settings', null) ? JSON.parse(GM_getValue('settings', null)) : JSON.parse({showExpandedLog: false})
-console.log(settings.showExpandedLog);
 const responses = [];
 const gameState = new GameState();
 var renderedRound = gameState.round;
@@ -90,12 +89,12 @@ function initializeSettings() {
     expandedLogCheck.addEventListener('change', () => {
         settings.showExpandedLog = !settings.showExpandedLog;
         expandedLogCheck.checked = settings.showExpandedLog;
-        console.log(settings);
         GM_setValue('settings', JSON.stringify(settings));
+        renderExpandedLogModule();
     });
 
     const expandedLogLabel = document.createElement('label');
-    expandedLogLabel.textContent = ' Load expanded battle log';
+    expandedLogLabel.textContent = ' Show expanded battle log';
     expandedLogLabel.prepend(expandedLogCheck);
 
     menuWrapper.appendChild(expandedLogLabel);
